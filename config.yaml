@@ -1,0 +1,235 @@
+model:
+  name: sentence-transformers/all-mpnet-base-v2
+  revision: e8c3b32edf5434bc2275fc9bab85f82640a19130
+  normalize: true
+  device: cuda
+  batch_size: 64
+  precision: fp32
+  embedding_dtype: float32
+  embedding_dim: 768
+  registry:
+    mpnet:
+      name: sentence-transformers/all-mpnet-base-v2
+      revision: e8c3b32edf5434bc2275fc9bab85f82640a19130
+segmentation:
+  engine: wtpsplit
+  version: 2.2.1
+  model: segment-any-text/sat-12l-sm
+  model_revision: d70c72a9331b2d5a9e82baad00c64964a23a09bb
+  tokenizer: facebookAI/xlm-roberta-base
+  tokenizer_revision: e73636d4f797dec63c3081bb6ed5c7b0bb3f2089
+  device: cuda
+  half_precision: true
+  split_on_input_newlines: true
+  preprocessing:
+    enabled: true
+    list_markers:
+    - •
+    - ▪
+    - ●
+    - ◦
+    - ·
+    - '-'
+    - '*'
+    - –
+    - o
+    inline_markers:
+    - •
+    - ▪
+    - ●
+    - ◦
+    end_punctuation: '.!?;:'
+    item_split_after: .!?;
+    lead_in_endings:
+    - be able to
+    - in order to
+    - responsible for
+    - looking for
+    - consist of
+    - the opportunity to
+    lead_in_max_words: 12
+    continuation_words:
+    - a
+    - an
+    - and
+    - as
+    - at
+    - by
+    - for
+    - from
+    - in
+    - into
+    - of
+    - 'on'
+    - or
+    - the
+    - to
+    - with
+    - via
+  cleanup:
+    drop_empty: true
+    bullet_markers:
+    - ·
+    - •
+    - ▪
+    - ●
+    - '-'
+    - '*'
+    - –
+    drop_if_ends_with:
+    - ':'
+    strip_enumerators: true
+    drop_without_word: true
+    strip_emoji: true
+    drop_emoji_fragments: true
+    drop_all_caps_headings: true
+    drop_short_questions: true
+    require_content: true
+    drop_single_words: true
+    drop_section_headings: true
+    section_headings:
+    - about (us|the (company|role|job|team))
+    - who we are|who you are
+    - what (you|we|awaits|do we offer)\b.*
+    - why (us|join|work)\b.*
+    - your (impact|profile|role|mission|tasks|benefits|team)
+    - our (offer|commitment|culture|values|team)
+    - job (description|summary|details|title)
+    - (role|position) (description|summary)
+    - duties|responsibilities|accountabilities
+    - requirements|qualifications|benefits|perks|compensation|salary
+    - how to apply|application( process)?|apply now|interested\??|next steps?|step \d+
+    - contact|location|full time|part time|hybrid|remote
+    - learning (objectives?|outcomes?)|objectives?|aims?
+    - competenc(e|y|es|ies)|knowledge|skills|prerequisites?|prior knowledge|entry requirements
+    - syllabus|description|content|contents|course content
+    - assessment|evaluation|grading|teaching (method|methods|form)
+    - literature|bibliography|references
+    - reason|introduction|general information
+reference_framework:
+  file: raw_data/referent_framework/ECSF_v1.json
+  sha256: 7729813fb61957349913dfdabd7b1db71bec2d3862aa79c5095315e366e58502
+  expected_rows: 227
+  expected_statements: 150
+
+seed: 42
+
+threshold:
+  tau: 0.585
+
+bands:
+  - {min: 0.585, max: 1.010, w: 1.00}
+  - {min: 0.390, max: 0.585, w: 0.00}
+  - {min: -1.000, max: 0.390, w: 0.00}
+
+threshold_validation:
+  strata:
+    - {h: 1, min: -1.00, max: 0.30, n: 6}
+    - {h: 2, min: 0.30, max: 0.39, n: 12}
+    - {h: 3, min: 0.39, max: 0.45, n: 18}
+    - {h: 4, min: 0.45, max: 0.50, n: 42}
+    - {h: 5, min: 0.50, max: 0.55, n: 60}
+    - {h: 6, min: 0.55, max: 0.60, n: 60}
+    - {h: 7, min: 0.60, max: 0.70, n: 54}
+    - {h: 8, min: 0.70, max: 0.80, n: 30}
+    - {h: 9, min: 0.80, max: 1.01, n: 18}
+  length_groups:
+    - {name: "1-3", min_words: 1, max_words: 3}
+    - {name: "4-6", min_words: 4, max_words: 6}
+    - {name: "7+", min_words: 7}
+  limits:
+    per_curriculum: 8
+    per_job_advertisement: 2
+    per_statement: 3
+  minimum_length_rule:
+    short_words: 2
+    compare_from_words: 3
+    alpha: 0.05
+    test: fisher_one_sided
+  annotators: [annotator_1, annotator_2]
+  analysis:
+    grid: {min: 0.30, max: 0.80, step: 0.005}
+    bootstrap: 5000
+    confidence: 0.95
+    kappa_gate: 0.40
+    band_rate: mean_of_sources
+    fisher_alpha: 0.05
+    weight_step: 0.05
+
+sensitivity:
+  tau_appendix: [0.580, 0.595]
+  alt_model: sentence-transformers/all-MiniLM-L6-v2
+  alt_model_revision: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+
+known_groups:
+  minimum_group: 10
+  advertisement_titles:
+    PenTester: ["penetration test", "pentest", "ethical hack", "red team"]
+    CISO: ["ciso", "chief information security"]
+    IncidentResponder: ["incident respon", "soc analyst", "security operations cent", "csirt"]
+    ThreatIntel: ["threat intelligence", "threat intel"]
+    Auditor: ["auditor", " audit"]
+    RiskManager: ["risk manager", "risk management"]
+    Architect: ["security architect"]
+    Forensics: ["forensic"]
+  course_names:
+    Forensics: ["forensic"]
+    PenTester: ["penetration", "ethical hacking", "offensive"]
+    IncidentResponder: ["incident", "soc "]
+    Auditor: ["audit"]
+    RiskManager: ["risk"]
+    LegalCompliance: ["law", "legal", "regulation", "compliance", "gdpr"]
+    Architect: ["architect"]
+
+sets:
+  scheme: UN M49 geoscheme for Europe (Cyprus in Southern Europe, as in Eurostat)
+  regions:
+    western_europe: [Austria, Belgium, France, Germany, Luxembourg, Netherlands]
+    northern_europe: [Denmark, Estonia, Finland, Ireland, Latvia, Lithuania, Sweden]
+    southern_europe: [Croatia, Cyprus, Greece, Italy, Malta, Portugal, Slovenia, Spain]
+    eastern_europe: [Bulgaria, Czechia, Hungary, Poland, Romania, Slovakia]
+  minimum_job_advertisements: 15
+  minimum_curricula: 5
+  analysis_curricula:
+    - at_ustp
+    - be_kuleuven
+    - bg_nbu
+    - cy_ouc
+    - cz_ctu
+    - de_hdbw
+    - dk_aau
+    - ee_taltech
+    - es_uah
+    - fi_jamk
+    - fr_ubs
+    - gr_ihu
+    - hr_tvz
+    - hu_nke
+    - ie_mtu
+    - it_unipi
+    - lt_vilniustech
+    - lu_unilu
+    - lv_lu
+    - mt_um
+    - nl_uva
+    - pl_prz
+    - pt_ipleiria
+    - ro_utcn
+    - se_kth
+    - si_fis
+    - sk_tuke
+  curriculum_set_measure: share
+
+characteristic_statements:
+  correction: by
+  maximum_q: 0.05
+  minimum_lift: 1.5
+  minimum_share: 0.20
+  zero_cell_correction: 0.5
+  per_side: 3
+  sensitivity:
+    - {correction: bh}
+    - {minimum_lift: 1.25}
+    - {minimum_lift: 2.0}
+    - {minimum_share: 0.10}
+    - {minimum_share: 0.30}

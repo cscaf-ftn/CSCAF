@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+.ipynb_checkpoints/
+.idea/
+.vscode/
+
+/raw_data/
+*.db
+
+/methodology/output/
+/results/output/
+/data_load/load_reports/
